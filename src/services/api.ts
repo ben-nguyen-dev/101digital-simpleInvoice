@@ -1,12 +1,13 @@
 import axios, { AxiosInstance } from 'axios';
 
 import encodeParams from '../utils/encodeParams';
-import { BASE_URL } from '../utils/constants';
 import getAccessToken from '../utils/getAccessToken';
+import { BASE_URL } from '../constants/constant';
 
 export const api: AxiosInstance = axios.create({
     baseURL: BASE_URL,
     timeout: 0,
+    withCredentials: false,
     headers: {
         'Content-Type': 'application/json',
     },

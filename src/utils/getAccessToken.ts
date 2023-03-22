@@ -1,8 +1,8 @@
-import { ACCESS_TOKEN } from './constants';
+import { LOCAL_STORAGE } from '../constants/constant';
 
 const getAccessToken = () => {
     try {
-        return localStorage.getItem(ACCESS_TOKEN);
+        return localStorage.getItem(LOCAL_STORAGE.ACCESS_TOKEN);
     } catch (err) {
         return null;
     }

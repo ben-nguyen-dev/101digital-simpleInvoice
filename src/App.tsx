@@ -1,10 +1,16 @@
 import { useRoutes } from 'react-router-dom';
-import { notAuthRoutes } from './routers/routers';
+import { authRoute, notAuthRoutes } from './routers/routers';
 import './App.css';
 
 function App() {
     const contentNotAuth = useRoutes(notAuthRoutes);
-    return <div className="App">{contentNotAuth}</div>;
+    const contentAuth = useRoutes(authRoute);
+    return (
+        <div className="App">
+            {contentNotAuth}
+            {contentAuth}
+        </div>
+    );
 }
 
 export default App;

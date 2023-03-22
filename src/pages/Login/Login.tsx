@@ -5,7 +5,7 @@ import { IUserDataLogin } from './model/ILogin';
 import _ from 'lodash';
 import { useNavigate } from 'react-router-dom';
 import userService from '../../services/UserService/UserService';
-import { ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_TYPE } from '../../utils/constants';
+import { APP_ROUTER, LOCAL_STORAGE } from '../../constants/constant';
 
 const initUserData: IUserDataLogin = {
     userName: '',
@@ -35,9 +35,10 @@ const Login: FC<ILoginProps> = () => {
             const res = await userService.login(userData);
             const { access_token, refresh_token, token_type } = res.data;
 
-            localStorage.setItem(ACCESS_TOKEN, access_token);
-            localStorage.setItem(REFRESH_TOKEN, refresh_token);
-            localStorage.setItem(TOKEN_TYPE, token_type);
+            localStorage.setItem(LOCAL_STORAGE.ACCESS_TOKEN, access_token);
+            localStorage.setItem(LOCAL_STORAGE.REFRESH_TOKEN, refresh_token);
+            localStorage.setItem(LOCAL_STORAGE.TOKEN_TYPE, token_type);
+            navigate(APP_ROUTER.INVOICE.INDEX);
         } catch (e) {
             console.log(e);
         }
