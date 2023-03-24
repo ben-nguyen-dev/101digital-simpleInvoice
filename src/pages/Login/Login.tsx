@@ -1,11 +1,24 @@
 import React, { FC, useState } from 'react';
-import Button from '../../components/Buttons/Button';
-import FormTextField from '../../components/FormTextField/FormTextField';
-import { IUserDataLogin } from './model/ILogin';
+import { IUserDataLogin } from '../../interfaces/Login/ILogin';
 import _ from 'lodash';
 import { useNavigate } from 'react-router-dom';
 import userService from '../../services/UserService/UserService';
 import { APP_ROUTER, LOCAL_STORAGE } from '../../constants/constant';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import {
+    Avatar,
+    Box,
+    Button,
+    Checkbox,
+    Container,
+    CssBaseline,
+    FormControlLabel,
+    Grid,
+    Link,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const initUserData: IUserDataLogin = {
     userName: '',
@@ -16,6 +29,7 @@ enum TYPE_FIELD {
     USER_NAME = 'userName',
     PASSWORD = 'password',
 }
+const theme = createTheme();
 
 export interface ILoginProps {}
 
@@ -29,7 +43,7 @@ const Login: FC<ILoginProps> = () => {
         setUserData(_userData);
     };
 
-    const onLogin = async (e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         try {
             const res = await userService.login(userData);
@@ -44,46 +58,66 @@ const Login: FC<ILoginProps> = () => {
         }
     };
     return (
-        <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
-            <div className="w-full p-6 m-auto bg-white rounded-md shadow-md lg:max-w-xl">
-                <h1 className="text-3xl font-semibold text-center text-purple-700 underline">Sign in</h1>
-                <form className="mt-6">
-                    <div className="mb-2">
-                        <FormTextField
-                            type={'email'}
-                            required={true}
-                            label={'Email'}
-                            onChange={(e: any) => {
-                                handleChange(TYPE_FIELD.USER_NAME, e?.target?.value || '');
-                            }}
-                            value={userData.userName || ''}
+        <ThemeProvider theme={theme}>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline />
+                <Box
+                    sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                        <LockOutlinedIcon />
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Sign in
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            onChange={(e: any) => handleChange(TYPE_FIELD.USER_NAME, e?.target?.value)}
                         />
-                    </div>
-                    <div className="mb-2">
-                        <FormTextField
-                            type={'password'}
-                            required={true}
-                            label={'Password'}
-                            onChange={(e: any) => {
-                                handleChange(TYPE_FIELD.PASSWORD, e?.target?.value || '');
-                            }}
-                            value={userData.password || ''}
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Password"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            onChange={(e: any) => handleChange(TYPE_FIELD.PASSWORD, e?.target?.value)}
                         />
-                    </div>
-                    <a href="#" className="text-xs text-purple-600 hover:underline">
-                        Forget Password?
-                    </a>
-                    <div className="mt-6">
-                        <Button onClick={onLogin}>Login</Button>
-                    </div>
-                </form>
-
-                <p className="mt-8 text-xs font-light text-center text-gray-700">
-                    {' '}
-                    Don't have an account? <a className="font-medium text-purple-600 hover:underline">Sign up</a>
-                </p>
-            </div>
-        </div>
+                        <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
+                        <Button fullWidth type="submit" variant="contained" sx={{ mt: 3, mb: 2 }}>
+                            Sign In
+                        </Button>
+                        <Grid container>
+                            <Grid item xs>
+                                <Link href="#" variant="body2">
+                                    Forgot password?
+                                </Link>
+                            </Grid>
+                            <Grid item>
+                                <Link href="#" variant="body2">
+                                    {"Don't have an account? Sign Up"}
+                                </Link>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Box>
+            </Container>
+        </ThemeProvider>
     );
 };
 export default Login;

@@ -3,7 +3,8 @@ import { getAccessToken } from '../../utils/getToken';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { APP_ROUTER, LOCAL_STORAGE } from '../../constants/constant';
 import userService from '../../services/UserService/UserService';
-import Spinet from '../../components/loadings/Spinet';
+import Progress from '../../components/Loadings/Progress';
+import { Box } from '@mui/material';
 
 interface AuthLayoutProps {
     children?: ReactNode;
@@ -41,7 +42,7 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
             setLoading(false);
         }
     };
-    return <div className="auth-layout p-5 w-screen h-screen">{loading ? <Spinet /> : children || <Outlet />}</div>;
+    return <Box height={'100vh'}>{loading ? <Progress /> : children || <Outlet />}</Box>;
 };
 
 export default AuthLayout;

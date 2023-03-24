@@ -1,6 +1,6 @@
 import { api, apiGetToken } from '../api';
 import qs from 'qs';
-import { IUserDataLogin } from '../../pages/Login/model/ILogin';
+import { IUserDataLogin } from '../../interfaces/Login/ILogin';
 
 const clientID = process.env.REACT_APP_CLIENT_ID;
 const clientSecret = process.env.REACT_APP_CLIENT_SECRET;

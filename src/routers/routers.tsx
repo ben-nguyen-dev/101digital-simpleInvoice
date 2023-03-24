@@ -1,13 +1,13 @@
 import BaseLayout from '../layouts/BaseLayout/BaseLayout';
 import { lazy, Suspense } from 'react';
-import Spinet from '../components/loadings/Spinet';
+import Progress from '../components/Loadings/Progress';
 import AuthLayout from '../layouts/AuthLayout/AuthLayout';
 import { APP_ROUTER } from '../constants/constant';
 import { RouteObject } from 'react-router/dist/lib/context';
 
 const Loader = (Component: any) => (props: any) =>
     (
-        <Suspense fallback={<Spinet />}>
+        <Suspense fallback={<Progress />}>
             <Component {...props} />
         </Suspense>
     );

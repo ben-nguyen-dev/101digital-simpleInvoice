@@ -6,8 +6,7 @@ function useList<T>({ get, title }: IInfo) {
     const [data, setData] = useState<T[]>([]);
     const [filters, setFilters] = useState<IFilter>({
         pageNum: 1,
-        pageSize: 20,
-        keyword: '',
+        pageSize: 10,
     });
 
     const changeFilters = (value: Partial<IFilter>) =>

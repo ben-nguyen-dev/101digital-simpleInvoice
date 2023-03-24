@@ -1,8 +1,13 @@
+export enum ORDERING {
+    ASC = 'ASCENDING',
+    DESC = 'DESCENDING',
+}
+
 export interface IFilter {
     pageNum: number;
     pageSize: number;
     keyword?: string;
-    ordering?: 'ASCENDING' | 'DESCENDING' | null;
+    ordering?: ORDERING | null;
     fromDate?: string;
     toDate?: string;
     sortBy?: string;
