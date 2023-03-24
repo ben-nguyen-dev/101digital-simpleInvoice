@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 import encodeParams from '../utils/encodeParams';
-import getAccessToken from '../utils/getAccessToken';
+import { getAccessToken, getOrgToken } from '../utils/getToken';
 import { BASE_URL } from '../constants/constant';
 
 export const api: AxiosInstance = axios.create({
@@ -35,8 +35,12 @@ export const apiGetToken: AxiosInstance = axios.create({
     i.interceptors.request.use(
         (config: any) => {
             const token = getAccessToken();
+            const orgToken = getOrgToken();
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
+                if (orgToken) {
+                    config.headers['org-token'] = orgToken;
+                }
             }
             return config;
         },

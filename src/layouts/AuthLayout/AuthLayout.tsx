@@ -1,8 +1,9 @@
-import React, { FC, ReactNode, useEffect } from 'react';
-import getAccessToken from '../../utils/getAccessToken';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
+import { getAccessToken } from '../../utils/getToken';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { APP_ROUTER, LOCAL_STORAGE } from '../../constants/constant';
 import userService from '../../services/UserService/UserService';
+import Spinet from '../../components/loadings/Spinet';
 
 interface AuthLayoutProps {
     children?: ReactNode;
@@ -10,6 +11,7 @@ interface AuthLayoutProps {
 
 const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         checkAuthentication();
@@ -25,6 +27,7 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
         if (orgToken) return;
 
         try {
+            setLoading(true);
             const res = await userService.getUserProfile();
             if (!res?.data) return;
             const org_token = res?.data?.data?.memberships[0]?.token;
@@ -34,9 +37,11 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
             localStorage.removeItem(LOCAL_STORAGE.ACCESS_TOKEN);
             localStorage.removeItem(LOCAL_STORAGE.REFRESH_TOKEN);
             navigate(APP_ROUTER.LOGIN);
+        } finally {
+            setLoading(false);
         }
     };
-    return <div className="auth-layout p-5 w-screen h-screen">{children || <Outlet />}</div>;
+    return <div className="auth-layout p-5 w-screen h-screen">{loading ? <Spinet /> : children || <Outlet />}</div>;
 };
 
 export default AuthLayout;
