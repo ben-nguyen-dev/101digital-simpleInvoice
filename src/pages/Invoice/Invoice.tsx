@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import invoiceService from '../../services/InvoiceService/InvoiceService';
 import useList from '../../hooks/useList';
 import { IInvoice } from '../../interfaces/Invoice/IInvoice';
 import {
     Box,
+    Button,
     FormControl,
     InputLabel,
     MenuItem,
@@ -19,11 +20,14 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { ORDERING } from '../../interfaces/CRUD/crud';
-import { debounce } from 'lodash';
+import { debounce, get } from 'lodash';
 import { DatePicker } from '@mui/x-date-pickers';
-import { FORMAT_DATE, STATUS } from '../../constants/constant';
+import { APP_ROUTER, FORMAT_DATE, STATUS } from '../../constants/constant';
 import dayjs from 'dayjs';
+import Progress from '../../components/Loadings/Progress';
+import { useNavigate } from 'react-router-dom';
 
 const headerCell = [
     {
@@ -52,16 +56,23 @@ const headerCell = [
     {
         sortable: true,
         label: 'Status',
-        field: 'status[0]?.key',
+        field: 'status[0].key',
         sortField: 'status',
+    },
+    {
+        sortable: true,
+        label: 'Created At',
+        field: 'createdAt',
+        sortField: 'createdAt',
     },
 ];
 
 const Invoice = () => {
-    const { data, total, filters, changeFilters, setSearchString, searchString } = useList<IInvoice>({
+    const { data, total, filters, changeFilters, loading } = useList<IInvoice>({
         get: invoiceService.get,
         title: 'Invoice page',
     });
+    const navigate = useNavigate();
 
     const searchKeyword = debounce((searchString: string) => {
         changeFilters({ keyword: searchString });
@@ -103,7 +114,9 @@ const Invoice = () => {
         changeFilters({ status: !!e ? e : null });
     };
 
-    console.log('data 💩', { data }, '');
+    const onAddButton = () => {
+        navigate(APP_ROUTER.INVOICE.ADD);
+    };
 
     return (
         <Box sx={{ p: 2 }} display={'flex'} flexDirection={'column'} flex={1} overflow={'hidden'}>
@@ -111,6 +124,9 @@ const Invoice = () => {
                 Invoice Page
             </Typography>
             <Box sx={{ display: 'flex', mb: 2 }}>
+                <Button onClick={onAddButton} variant="contained" startIcon={<AddIcon />} sx={{ mr: 2 }}>
+                    Add
+                </Button>
                 <TextField
                     label="Search"
                     onChange={(event) => searchKeyword(event.target.value)}
@@ -147,43 +163,45 @@ const Invoice = () => {
             </Box>
 
             <TableContainer sx={{ flex: 1 }}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                        <TableRow>
-                            {headerCell.map((header) => (
-                                <TableCell
-                                    key={header.field}
-                                    sx={{ cursor: header.sortable ? 'pointer' : 'default' }}
-                                    onClick={() =>
-                                        header.sortable && header.sortField ? handleSort(header?.sortField) : {}
-                                    }
-                                >
-                                    {header.sortable && header.sortField ? (
-                                        <TableSortLabel
-                                            active={filters.sortBy === header.sortField}
-                                            direction={filters.ordering === ORDERING.ASC ? 'asc' : 'desc'}
-                                        >
-                                            {header.label}
-                                        </TableSortLabel>
-                                    ) : (
-                                        header.label
-                                    )}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {data.map((invoice) => (
-                            <TableRow key={invoice.invoiceId}>
-                                <TableCell>{invoice.invoiceId}</TableCell>
-                                <TableCell>{invoice.invoiceNumber}</TableCell>
-                                <TableCell>{invoice.invoiceDate}</TableCell>
-                                <TableCell>{invoice.type}</TableCell>
-                                <TableCell>{invoice.status[0]?.key}</TableCell>
+                {loading ? (
+                    <Progress />
+                ) : (
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                {headerCell.map((header) => (
+                                    <TableCell
+                                        key={header.field}
+                                        sx={{ cursor: header.sortable ? 'pointer' : 'default' }}
+                                        onClick={() =>
+                                            header.sortable && header.sortField ? handleSort(header?.sortField) : {}
+                                        }
+                                    >
+                                        {header.sortable && header.sortField ? (
+                                            <TableSortLabel
+                                                active={filters.sortBy === header.sortField}
+                                                direction={filters.ordering === ORDERING.ASC ? 'asc' : 'desc'}
+                                            >
+                                                {header.label}
+                                            </TableSortLabel>
+                                        ) : (
+                                            header.label
+                                        )}
+                                    </TableCell>
+                                ))}
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {data.map((invoice) => (
+                                <TableRow key={invoice.invoiceId}>
+                                    {headerCell.map((header) => (
+                                        <TableCell key={header.field}>{get(invoice, header.field)}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </TableContainer>
             <Box sx={{ mt: 2 }}>
                 <TablePagination

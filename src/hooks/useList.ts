@@ -9,6 +9,8 @@ function useList<T>({ get, title }: IInfo) {
         pageNum: 1,
         pageSize: 10,
     });
+    const [total, setTotal] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const changeFilters = (value: Partial<IFilter>) =>
         setFilters({
@@ -16,18 +18,17 @@ function useList<T>({ get, title }: IInfo) {
             ...value,
         });
 
-    const [total, setTotal] = useState<number>(0);
-
-    const [searchString, setSearchString] = useState('');
-
     const getData = useCallback(async () => {
         try {
+            setLoading(true);
             const res = await get(filters);
             if (!res?.data) return;
             setData(res.data?.data);
             setTotal(res.data?.paging?.totalRecords);
         } catch (err: any) {
             handleError(err);
+        } finally {
+            setLoading(false);
         }
     }, [filters]);
 
@@ -44,8 +45,7 @@ function useList<T>({ get, title }: IInfo) {
         total,
         filters,
         changeFilters,
-        searchString,
-        setSearchString,
+        loading,
     };
 }
 

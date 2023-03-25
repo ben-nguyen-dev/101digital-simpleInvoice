@@ -3,6 +3,8 @@ import { authRoute, notAuthRoutes } from './routers/routers';
 import './App.css';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
+import ToastMessageView from './components/ToastMessage/ToastMessage';
+import { Navigate, NavigateRef } from './hooks/useNavigateRef';
 
 function App() {
     const contentNotAuth = useRoutes(notAuthRoutes);
@@ -13,6 +15,8 @@ function App() {
                 {contentNotAuth}
                 {contentAuth}
             </LocalizationProvider>
+            <ToastMessageView />
+            <Navigate ref={NavigateRef} />
         </div>
     );
 }

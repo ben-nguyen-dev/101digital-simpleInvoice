@@ -24,3 +24,8 @@ export const STATUS = [
     { label: 'Due', value: 'Due' },
     { label: '', value: '' },
 ];
+
+export enum TOAST_MESSAGE_TYPE {
+    ERROR = 'error',
+    SUCCESS = 'success',
+}

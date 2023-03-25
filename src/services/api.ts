@@ -11,9 +11,6 @@ export const api: AxiosInstance = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    paramsSerializer: {
-        encode: (params) => encodeParams(params),
-    },
 });
 
 export const apiUpload: AxiosInstance = axios.create({

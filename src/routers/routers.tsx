@@ -4,6 +4,7 @@ import Progress from '../components/Loadings/Progress';
 import AuthLayout from '../layouts/AuthLayout/AuthLayout';
 import { APP_ROUTER } from '../constants/constant';
 import { RouteObject } from 'react-router/dist/lib/context';
+import AddEditInvoice from '../pages/Invoice/AddEditInvoice/AddEditInvoice';
 
 const Loader = (Component: any) => (props: any) =>
     (
@@ -44,6 +45,10 @@ export const authRoute: RouteObject[] = [
             {
                 path: APP_ROUTER.INVOICE.INDEX,
                 element: <Invoice />,
+            },
+            {
+                path: APP_ROUTER.INVOICE.ADD,
+                element: <AddEditInvoice />,
             },
         ],
     },
