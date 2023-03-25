@@ -8,6 +8,7 @@ export interface IFilter {
     pageSize: number;
     keyword?: string;
     ordering?: ORDERING | null;
+    dateType?: string;
     fromDate?: string;
     toDate?: string;
     sortBy?: string;

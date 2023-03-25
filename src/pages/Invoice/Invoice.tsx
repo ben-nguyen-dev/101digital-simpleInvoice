@@ -21,6 +21,9 @@ import {
 } from '@mui/material';
 import { ORDERING } from '../../interfaces/CRUD/crud';
 import { debounce } from 'lodash';
+import { DatePicker } from '@mui/x-date-pickers';
+import { FORMAT_DATE, STATUS } from '../../constants/constant';
+import dayjs from 'dayjs';
 
 const headerCell = [
     {
@@ -64,11 +67,6 @@ const Invoice = () => {
         changeFilters({ keyword: searchString });
     }, 1000);
 
-    const handleSearch = (value: string) => {
-        setSearchString(value);
-        searchKeyword(value);
-    };
-
     const handleSort = (sortByField: string) => {
         let ordering: ORDERING | null = ORDERING.DESC;
         let sortBy: string | undefined = sortByField;
@@ -93,75 +91,68 @@ const Invoice = () => {
         changeFilters({ pageSize: e?.target?.value });
     };
 
+    const handleChangeDate = (e: any, field: string) => {
+        const value = dayjs(e).format(FORMAT_DATE);
+        if (value === 'Invalid Date') {
+            changeFilters({ [field]: null });
+        } else {
+            changeFilters({ [field]: value, dateType: 'INVOICE_DATE' });
+        }
+    };
+    const handleChangeStatus = (e: any) => {
+        changeFilters({ status: !!e ? e : null });
+    };
+
     console.log('data 💩', { data }, '');
 
     return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2 }} display={'flex'} flexDirection={'column'} flex={1} overflow={'hidden'}>
             <Typography variant="h5" sx={{ mb: 2 }}>
                 Invoice Page
             </Typography>
             <Box sx={{ display: 'flex', mb: 2 }}>
                 <TextField
                     label="Search"
-                    // value={searchString}
                     onChange={(event) => searchKeyword(event.target.value)}
-                    size="small"
+                    size="medium"
                     sx={{ mr: 2 }}
                 />
-
-                <FormControl variant="outlined" size="small" sx={{ mr: 2 }}>
-                    <InputLabel htmlFor="from-date">Từ ngày</InputLabel>
+                <DatePicker
+                    format={FORMAT_DATE}
+                    onChange={(event) => handleChangeDate(event, 'fromDate')}
+                    label="From Date"
+                    sx={{ mr: 2 }}
+                />
+                <DatePicker
+                    format={FORMAT_DATE}
+                    onChange={(event) => handleChangeDate(event, 'toDate')}
+                    label="To Date"
+                    sx={{ mr: 2 }}
+                />
+                <FormControl variant="outlined" size="medium" sx={{ width: 200 }}>
+                    <InputLabel htmlFor="status">Status</InputLabel>
                     <Select
-                        label="Từ ngày"
-                        // value={fromDate}
-                        // onChange={(event) => setFromDate(event.target.value as string)}
-                        inputProps={{ id: 'from-date' }}
+                        label="Status"
+                        value={filters.status || ''}
+                        onChange={(event) => handleChangeStatus(event.target.value as string)}
+                        inputProps={{ id: 'status' }}
                     >
-                        <MenuItem value="">Tất cả</MenuItem>
-                        <MenuItem value="2022-01-01">1/1/2022</MenuItem>
-                        <MenuItem value="2022-02-01">1/2/2022</MenuItem>
-                        <MenuItem value="2022-03-01">1/3/2022</MenuItem>
-                        {/* Add more options as needed */}
-                    </Select>
-                </FormControl>
-                <FormControl variant="outlined" size="small" sx={{ mr: 2 }}>
-                    <InputLabel htmlFor="to-date">Đến ngày</InputLabel>
-                    <Select
-                        label="Đến ngày"
-                        // value={toDate}
-                        // onChange={(event) => setToDate(event.target.value as string)}
-                        inputProps={{ id: 'to-date' }}
-                    >
-                        <MenuItem value="">Tất cả</MenuItem>
-                        <MenuItem value="2022-03-31">31/3/2022</MenuItem>
-                        <MenuItem value="2022-04-30">30/4/2022</MenuItem>
-                        <MenuItem value="2022-05-31">31/5/2022</MenuItem>
-                        {/* Add more options as needed */}
-                    </Select>
-                </FormControl>
-
-                <FormControl variant="outlined" size="small">
-                    <InputLabel htmlFor="sort-by">Sắp xếp</InputLabel>
-                    <Select
-                        label="Sắp xếp"
-                        // value={sortField}
-                        // onChange={(event) => handleSort(event.target.value as string)}
-                        inputProps={{ id: 'sort-by' }}
-                    >
-                        <MenuItem value="id">ID</MenuItem>
-                        <MenuItem value="name">Tên khách hàng</MenuItem>
-                        <MenuItem value="date">Ngày tạo</MenuItem>
-                        <MenuItem value="total">Tổng tiền</MenuItem>
+                        {STATUS.map((status) => (
+                            <MenuItem key={status.value} value={status.value}>
+                                {status.label === '' ? <em>None</em> : status.label}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
             </Box>
 
-            <TableContainer>
-                <Table>
+            <TableContainer sx={{ flex: 1 }}>
+                <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
                             {headerCell.map((header) => (
                                 <TableCell
+                                    key={header.field}
                                     sx={{ cursor: header.sortable ? 'pointer' : 'default' }}
                                     onClick={() =>
                                         header.sortable && header.sortField ? handleSort(header?.sortField) : {}
@@ -194,7 +185,7 @@ const Invoice = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Box sx={{ mt: 2 }}>
                 <TablePagination
                     count={total}
                     page={filters.pageNum - 1}

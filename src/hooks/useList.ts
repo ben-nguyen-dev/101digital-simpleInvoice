@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { IFilter, IInfo } from '../interfaces/CRUD/crud';
+import { handleError } from '../utils/handleError';
 
 function useList<T>({ get, title }: IInfo) {
     const [data, setData] = useState<T[]>([]);
@@ -26,7 +27,7 @@ function useList<T>({ get, title }: IInfo) {
             setData(res.data?.data);
             setTotal(res.data?.paging?.totalRecords);
         } catch (err: any) {
-            console.log(err);
+            handleError(err);
         }
     }, [filters]);
 

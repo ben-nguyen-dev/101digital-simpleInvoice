@@ -15,3 +15,12 @@ export const LOCAL_STORAGE = {
 };
 
 export const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://sandbox.101digital.io';
+
+export const FORMAT_DATE = 'YYYY-MM-DD';
+
+export const STATUS = [
+    { label: 'Paid', value: 'Paid' },
+    { label: 'Overdue', value: 'Overdue' },
+    { label: 'Due', value: 'Due' },
+    { label: '', value: '' },
+];

@@ -42,7 +42,11 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
             setLoading(false);
         }
     };
-    return <Box height={'100vh'}>{loading ? <Progress /> : children || <Outlet />}</Box>;
+    return (
+        <Box height={'100vh'} display={'flex'} flexDirection={'column'}>
+            {loading ? <Progress /> : children || <Outlet />}
+        </Box>
+    );
 };
 
 export default AuthLayout;
