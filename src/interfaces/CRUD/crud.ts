@@ -22,12 +22,14 @@ export interface IInfo {
 
 export interface IFormFiled {
     label: string;
+    path: string;
     field: string;
     isRequired: boolean;
     type: FORM_TYPE;
 }
 export enum FORM_TYPE {
     TEXT = 'text',
+    EMAIL = 'email',
     NUMBER = 'number',
     DATE = 'date',
     TEXTAREA = 'textarea',

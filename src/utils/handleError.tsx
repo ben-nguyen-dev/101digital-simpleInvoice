@@ -11,7 +11,6 @@ export const handleError = (error: any) => {
         localStorage.removeItem(LOCAL_STORAGE.TOKEN_TYPE);
         (NavigateRef.current as any)?.push(APP_ROUTER.LOGIN);
     } else {
-        console.log('error 💩', { error }, '');
         ToastMessage(TOAST_MESSAGE_TYPE.ERROR, error?.message);
     }
 };

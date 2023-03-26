@@ -12,6 +12,10 @@ import { handleError } from '../../../utils/handleError';
 import invoiceService from '../../../services/InvoiceService/InvoiceService';
 import { useNavigate } from 'react-router-dom';
 import { ToastMessage } from '../../../components/ToastMessage/ToastMessage';
+import { useYup } from './Yup';
+import { useForm } from 'react-hook-form';
+import { IUserDataLogin } from '../../../interfaces/Login/ILogin';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const invoiceInit = {
     bankAccount: {
@@ -41,13 +45,27 @@ const invoiceInit = {
     items: [],
 };
 
-const FormField = ({ type, value, ...props }: { type: FORM_TYPE; value?: string; [key: string]: any }) => {
+const FormField = ({ type, getValues, register, setValue, field, ...rest }: any) => {
     if (type === FORM_TYPE.DATE) {
-        return <DatePicker format={FORMAT_DATE} value={dayjs(value)} {...props} sx={{ mb: 2 }} />;
+        return (
+            <DatePicker
+                format={FORMAT_DATE}
+                value={dayjs(getValues(field)) || ''}
+                {...register(field)}
+                {...rest}
+                sx={{ mb: 2 }}
+                onChange={(e: any) => {
+                    const value = dayjs(e).format(FORMAT_DATE) !== 'Invalid Date' ? dayjs(e).format(FORMAT_DATE) : '';
+
+                    setValue(field, value, { shouldValidate: true, shouldDirty: true });
+                }}
+                renderInput={(params: any) => <TextField {...params} {...rest} sx={{ width: '100%' }} />}
+            />
+        );
     } else if (type === FORM_TYPE.TEXTAREA) {
-        return <TextField fullWidth multiline rows={4} {...props} sx={{ mb: 2 }} />;
+        return <TextField fullWidth multiline rows={4} {...register(field)} {...rest} sx={{ mb: 2 }} />;
     } else {
-        return <TextField fullWidth type={type} {...props} sx={{ mb: 2 }} />;
+        return <TextField fullWidth type={type} {...register(field)} {...rest} sx={{ mb: 2 }} />;
     }
 };
 
@@ -61,22 +79,21 @@ const AddEditInvoice = () => {
     const [numberOfItem, setNumberOfItem] = useState<number>(1);
     const [numberOfFiledOfItem, setNumberOfFieldOfItem] = useState<INumberOfFiledOfItem>({ 0: 0 });
 
-    const handleChangeForm = (e: any, type: FORM_TYPE, field: string) => {
-        let value: string = e?.target?.value || '';
-        if (type === FORM_TYPE.DATE) {
-            value = dayjs(e).format(FORMAT_DATE) !== 'Invalid Date' ? dayjs(e).format(FORMAT_DATE) : '';
-        }
+    const { schema } = useYup();
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        getValues,
+        formState: { errors, isValid },
+    } = useForm({
+        mode: 'all',
+        resolver: yupResolver(schema),
+    });
 
-        const _invoiceData = cloneDeep(invoiceData);
-        set(_invoiceData, field, value);
-
-        setInvoiceData(_invoiceData);
-    };
-
-    const onSubmit = async (e: any) => {
-        e.preventDefault();
+    const onSubmit = async (data: any) => {
         try {
-            const res = await invoiceService.create({ invoices: [invoiceData] });
+            const res = await invoiceService.create({ invoices: [data] });
             ToastMessage(TOAST_MESSAGE_TYPE.SUCCESS, 'Add successful');
             navigate(APP_ROUTER.INVOICE.INDEX);
         } catch (error) {
@@ -89,19 +106,22 @@ const AddEditInvoice = () => {
             <Typography variant="h5" sx={{ mb: 2 }}>
                 Add Invoice Page
             </Typography>
-            <Box component="form">
-                <Grid container spacing={4}>
+            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <Typography variant="h6" sx={{ mb: 2 }}>
                             Bank Account
                         </Typography>
                         {BANK_FORM.map((form) => (
-                            <FormControl key={form.field} fullWidth>
+                            <FormControl key={form.path} fullWidth>
                                 <FormField
+                                    required={form.isRequired}
                                     label={form.label}
                                     type={form.type}
-                                    value={get(invoiceData, form.field)}
-                                    onChange={(event: any) => handleChangeForm(event, form.type, form.field)}
+                                    register={register}
+                                    field={form.path}
+                                    error={!!get(errors, form.path)}
+                                    helperText={get(errors, `${form.path}.message`)}
                                 />
                             </FormControl>
                         ))}
@@ -111,12 +131,15 @@ const AddEditInvoice = () => {
                             Customer
                         </Typography>
                         {CUSTOMER_FORM.map((form) => (
-                            <FormControl key={form.field} fullWidth>
+                            <FormControl key={form.path} fullWidth>
                                 <FormField
+                                    required={form.isRequired}
                                     label={form.label}
                                     type={form.type}
-                                    value={get(invoiceData, form.field)}
-                                    onChange={(event: any) => handleChangeForm(event, form.type, form.field)}
+                                    register={register}
+                                    field={form.path}
+                                    error={!!get(errors, form.path)}
+                                    helperText={get(errors, `${form.path}.message`)}
                                     sx={{ mb: 2 }}
                                 />
                             </FormControl>
@@ -127,16 +150,16 @@ const AddEditInvoice = () => {
                     <Typography variant="h6" sx={{ mb: 2 }}>
                         Document
                     </Typography>
-                    <Grid container spacing={4}>
+                    <Grid container spacing={2}>
                         {DOCUMENT_FORM.map((form) => (
-                            <Grid key={form.field} item xs={4}>
+                            <Grid key={form.path} item xs={4}>
                                 <FormControl fullWidth>
                                     <FormField
                                         required={form.isRequired}
                                         type={form.type}
                                         label={form.label}
-                                        value={get(invoiceData, form.field)}
-                                        onChange={(event: any) => handleChangeForm(event, form.type, form.field)}
+                                        register={register}
+                                        field={form.path}
                                         sx={{ mb: 2 }}
                                     />
                                 </FormControl>
@@ -151,14 +174,18 @@ const AddEditInvoice = () => {
                     </Typography>
                     <Grid container spacing={2}>
                         {INVOICE_FORM.map((form) => (
-                            <Grid item xs={6} padding={0} key={form.field}>
+                            <Grid item xs={6} padding={0} key={form.path}>
                                 <FormControl fullWidth>
                                     <FormField
+                                        setValue={setValue}
+                                        getValues={getValues}
                                         required={form.isRequired}
                                         type={form.type}
                                         label={form.label}
-                                        value={get(invoiceData, form.field)}
-                                        onChange={(event: any) => handleChangeForm(event, form.type, form.field)}
+                                        register={register}
+                                        field={form.path}
+                                        error={!!get(errors, form.path)}
+                                        helperText={get(errors, `${form.path}.message`)}
                                         sx={{ mb: 2 }}
                                     />
                                 </FormControl>
@@ -173,14 +200,16 @@ const AddEditInvoice = () => {
                     </Typography>
                     <Grid container spacing={2}>
                         {CUSTOM_FIELD_FORM.map((form) => (
-                            <Grid key={form.field} item xs={6}>
+                            <Grid key={form.path} item xs={6}>
                                 <FormControl fullWidth>
                                     <FormField
                                         required={form.isRequired}
                                         type={form.type}
                                         label={form.label}
-                                        value={get(invoiceData, form.field)}
-                                        onChange={(event: any) => handleChangeForm(event, form.type, form.field)}
+                                        register={register}
+                                        field={form.path}
+                                        error={!!get(errors, form.path)}
+                                        helperText={get(errors, `${form.path}.message`)}
                                         sx={{ mb: 2 }}
                                     />
                                 </FormControl>
@@ -211,18 +240,18 @@ const AddEditInvoice = () => {
                             sx={{ mb: 4, pl: 0 }}
                         >
                             {ITEM_FORM.map((form) => {
-                                const currentField = `items[${indexItem}].${form.field}`;
+                                const currentField = `items[${indexItem}].${form.path}`;
                                 return (
-                                    <Grid key={form.field} item xs={6} padding={0} sx={{ p: 0 }}>
+                                    <Grid key={form.path} item xs={6} padding={0} sx={{ p: 0 }}>
                                         <FormControl fullWidth>
                                             <FormField
                                                 required={form.isRequired}
                                                 type={form.type}
                                                 label={form.label}
-                                                value={get(invoiceData, currentField)}
-                                                onChange={(event: any) =>
-                                                    handleChangeForm(event, form.type, currentField)
-                                                }
+                                                register={register}
+                                                field={currentField}
+                                                error={!!get(errors, currentField)}
+                                                helperText={get(errors, `${currentField}.message`)}
                                                 sx={{ mb: 2 }}
                                             />
                                         </FormControl>
@@ -245,7 +274,7 @@ const AddEditInvoice = () => {
                                     (indexField, index: number) => (
                                         <Grid container spacing={2} width={'auto'} key={indexField} item xs={4}>
                                             {CUSTOM_FIELD_FORM.map((form) => {
-                                                const currentField = `items[${indexItem}].customFields[${indexField}].${form.field}`;
+                                                const currentField = `items[${indexItem}].customFields[${indexField}].${form.path}`;
                                                 return (
                                                     <Grid item xs={6}>
                                                         <FormControl fullWidth>
@@ -253,10 +282,8 @@ const AddEditInvoice = () => {
                                                                 required={form.isRequired}
                                                                 type={form.type}
                                                                 label={form.label}
-                                                                value={get(invoiceData, form.field)}
-                                                                onChange={(event: any) =>
-                                                                    handleChangeForm(event, form.type, currentField)
-                                                                }
+                                                                register={register}
+                                                                field={currentField}
                                                                 sx={{ mb: 2 }}
                                                             />
                                                         </FormControl>
@@ -271,7 +298,7 @@ const AddEditInvoice = () => {
                     ))}
                 </Box>
 
-                <Button onClick={onSubmit} type="submit" variant="contained" color="primary">
+                <Button disabled={!isValid} type="submit" variant="contained" color="primary">
                     Add Invoice
                 </Button>
             </Box>
